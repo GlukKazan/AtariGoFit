@@ -17,9 +17,6 @@ let cnt = 0;
 function dump(board, size, offset, moves) {
     for (let y = 0; y < size; y++) {
         let s = '';
-        for (let i = 0; i <= y; i++) {
-            s = s + ' ';
-        }
         for (let x = 0; x < size; x++) {
             const pos = y * size + x;
             if (board[offset + pos] > 0) {
