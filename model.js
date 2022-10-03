@@ -4,9 +4,8 @@ const _ = require('underscore');
 const tf = require('@tensorflow/tfjs');
 
 const PLANE_COUNT = 1; // TODO: 4-8
-const BATCH_SIZE  = 256;
-const EPOCH_COUNT = 10;
-const VALID_SPLIT = 0.1;
+const BATCH_SIZE  = 1; //1024;
+const EPOCH_COUNT = 1;
 const LEARNING_RATE = 0.0001;
 
 const FILE_PREFIX = 'file:///users/user';
@@ -22,7 +21,7 @@ async function load(url, logger) {
     await init();
     const model = await tf.loadLayersModel(url);
     const opt = tf.train.sgd(LEARNING_RATE);
-    model.compile({optimizer: 'sgd', loss: ['categoricalCrossentropy', 'mse'], metrics: ['accuracy']});
+    model.compile({optimizer: opt, loss: ['categoricalCrossentropy', 'mse'], metrics: ['accuracy']});
     const t1 = Date.now();
     console.log('Model [' + url + '] loaded: ' + (t1 - t0));
     if (!_.isUndefined(logger)) {
@@ -62,7 +61,7 @@ async function create(size, logger) {
     const model = tf.model({inputs: input, outputs: [policy, value]});
 
     const opt = tf.train.sgd(LEARNING_RATE);
-    model.compile({optimizer: 'sgd', loss: ['categoricalCrossentropy', 'meanSquaredError'], metrics: ['accuracy']});
+    model.compile({optimizer: opt, loss: ['categoricalCrossentropy', 'meanSquaredError'], metrics: ['accuracy']});
    
     const t1 = Date.now();
     console.log('Model created: ' + (t1 - t0));
@@ -83,17 +82,16 @@ async function fit(model, size, x, y, z, batch, logger) {
     const t0 = Date.now();
     const h = await model.fit(xs, [ys, zs], {
         batchSize: BATCH_SIZE,
-        epochs: EPOCH_COUNT,
-        validationSplit: VALID_SPLIT
+        epochs: EPOCH_COUNT
     });    
 
-    console.log(h);
-/*  for (let i = 0; i < EPOCH_COUNT; i++) {
+//  console.log(h);
+    for (let i = 0; i < EPOCH_COUNT; i++) {
         console.log('epoch = ' + i + ', acc = [' + h.history.dense_Dense3_acc[i] + ' ,' + h.history.dense_Dense5_acc[i] + '], loss = [' + h.history.dense_Dense3_loss[i] + ' ,' + h.history.dense_Dense5_loss[i] + ']');
         if (!_.isUndefined(logger)) {
             logger.info('epoch = ' + i + ', acc = [' + h.history.dense_Dense3_acc[i] + ' ,' + h.history.dense_Dense5_acc[i] + '], loss = [' + h.history.dense_Dense3_loss[i] + ' ,' + h.history.dense_Dense5_loss[i] + ']');
         }
-    }*/
+    }
     const t1 = Date.now();
     console.log('Fit time: ' + (t1 - t0));
     if (!_.isUndefined(logger)) {
@@ -128,6 +126,7 @@ async function save(model, fileName) {
     await model.save(`${FILE_PREFIX}/${fileName}`);
 }
 
+module.exports.PLANE_COUNT = PLANE_COUNT;
 module.exports.create = create;
 module.exports.load = load;
 module.exports.fit = fit;

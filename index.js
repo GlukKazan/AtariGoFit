@@ -7,7 +7,7 @@ const ml = require('./model');
 const game = require('./game');
 
 const SIZE  = 9;
-const BATCH = 1024;
+const BATCH = 1; //4096;
 
 let model = null;
 
@@ -46,7 +46,8 @@ async function proceed() {
         console: false 
     });
     for await (const line of rl) {
-//      console.log(line);
+        console.log(line);
+        logger.info(line);
         await game.proceed(model, SIZE, BATCH, line, logger);
     }
     await ml.save(model, 'go.json');

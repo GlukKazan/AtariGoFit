@@ -36,10 +36,58 @@ function dump(board, size, offset, moves) {
     console.log('');
 }
 
-function rotate(pos, size, ix) {
-    /*if (ix == 0)*/ return pos;
-    // TODO: 0-7
+function flipX(pos, size) {
+    const x = pos % size;
+    pos -= x;
+    return pos + (size - x - 1);
+}
 
+function flipY(pos, size) {
+    const y = (pos / size) | 0;
+    pos -= y * size;
+    return (size - y - 1) * size + pos;
+}
+
+function toRight(pos, size) {
+    const x = pos % size;
+    const y = (pos / size) | 0;
+    return x * size + (size - y - 1);
+}
+
+function toLeft(pos, size) {
+    const x = pos % size;
+    const y = (pos / size) | 0;
+    return (size - x - 1) * size + y;
+}
+
+function rotate(pos, size, ix) {
+    switch (ix) {
+        case 1:
+            pos = flipX(pos, size);
+            break;
+        case 2:
+            pos = flipY(pos, size);
+            break;
+        case 3:
+            pos = flipX(pos, size);
+            pos = flipY(pos, size);
+            break;
+        case 4:
+            pos = toRight(pos, size);
+            break;
+        case 5:
+            pos = toLeft(pos, size);
+            break;
+        case 6:
+            pos = toRight(pos, size);
+            pos = flipX(pos, size);
+            break;
+        case 7:
+            pos = toLeft(pos, size);
+            pos = flipX(pos, size);
+            break;
+    }
+    return pos;
 }
 
 async function proceed(model, size, batch, data, logger) {
@@ -53,7 +101,7 @@ async function proceed(model, size, batch, data, logger) {
         const y = _.indexOf(LETTERS, data[pos + 1].toUpperCase());
         if ((y < 0) || (y >= size)) return;
         const move = y * size + x;
-        for (let ix = 0; ix < 1; ix++) { // TODO: 0-7
+        for (let ix = 0; ix < 8; ix++) {
             if ((X === null) || (C >= batch)) {
                 if (X !== null) {
                     await ml.fit(model, size, X, Y, Z, C, logger);
@@ -73,8 +121,8 @@ async function proceed(model, size, batch, data, logger) {
             for (let i = 0; i < size * size; i++) {
                 X[offset + rotate(i, size, ix)] = board[i] * player;
             }
-            Y[offset + rotate(move, size, ix)] = (player * winner > 0) ? 1 : 0;
-            Z[offset] = player * winner;
+            Y[offset + rotate(move, size, ix)] = (player * winner > 0) ? 1 : 0; // R - V
+            Z[offset] = player * winner; // R
 //          dump(X, size, offset, Y);
             C++;
             offset += size * size;
