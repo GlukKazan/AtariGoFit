@@ -25,7 +25,7 @@ const logFormat = winston.format.combine(
 
 var transport = new winston.transports.DailyRotateFile({
     dirname: '',
-    filename: 'go-%DATE%.log',
+    filename: 'go-' + ml.PLANE_COUNT + '-%DATE%.log',
     datePattern: 'YYYY-MM-DD',
     zippedArchive: true,
     maxSize: '20m',
@@ -41,6 +41,7 @@ var logger = winston.createLogger({
 
 async function proceed() {
     model = await ml.create(SIZE, logger);
+ // model = await ml.load(URL, logger);
     const rl = readline.createInterface({
         input: fs.createReadStream('data/go.txt'), 
         console: false 
@@ -50,7 +51,7 @@ async function proceed() {
         logger.info(line);
         await game.proceed(model, SIZE, BATCH, line, logger);
     }
-    await ml.save(model, 'go.json');
+    await ml.save(model, 'go' + ml.PLANE_COUNT + '.json');
 }
 
 async function run() {

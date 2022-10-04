@@ -1,14 +1,14 @@
 "use strict";
 
 const _ = require('underscore');
-const tf = require('@tensorflow/tfjs');
+const tf = require('@tensorflow/tfjs-node-gpu');
 
 const PLANE_COUNT = 1; // TODO: 4-8
 const BATCH_SIZE  = 1; //1024;
 const EPOCH_COUNT = 1;
 const LEARNING_RATE = 0.0001;
 
-const FILE_PREFIX = 'file:///users/user';
+const FILE_PREFIX = 'file:///users/valen';
 
 async function init() {
     await tf.ready();
@@ -21,7 +21,7 @@ async function load(url, logger) {
     await init();
     const model = await tf.loadLayersModel(url);
     const opt = tf.train.sgd(LEARNING_RATE);
-    model.compile({optimizer: opt, loss: ['categoricalCrossentropy', 'mse'], metrics: ['accuracy']});
+    model.compile({optimizer: opt, loss: ['categoricalCrossentropy', 'meanSquaredError'], metrics: ['accuracy']});
     const t1 = Date.now();
     console.log('Model [' + url + '] loaded: ' + (t1 - t0));
     if (!_.isUndefined(logger)) {
@@ -87,9 +87,9 @@ async function fit(model, size, x, y, z, batch, logger) {
 
 //  console.log(h);
     for (let i = 0; i < EPOCH_COUNT; i++) {
-        console.log('epoch = ' + i + ', acc = [' + h.history.dense_Dense3_acc[i] + ' ,' + h.history.dense_Dense5_acc[i] + '], loss = [' + h.history.dense_Dense3_loss[i] + ' ,' + h.history.dense_Dense5_loss[i] + ']');
+        console.log('epoch = ' + i + ', acc = [' + h.history.dense_Dense3_acc[i] + ' ,' + h.history.dense_Dense5_acc[i] + '], loss = [' + h.history.dense_Dense3_loss[i] + ' ,' + h.history.dense_Dense5_loss[i] + ' ,' + h.history.loss[i] + ']');
         if (!_.isUndefined(logger)) {
-            logger.info('epoch = ' + i + ', acc = [' + h.history.dense_Dense3_acc[i] + ' ,' + h.history.dense_Dense5_acc[i] + '], loss = [' + h.history.dense_Dense3_loss[i] + ' ,' + h.history.dense_Dense5_loss[i] + ']');
+            logger.info('epoch = ' + i + ', acc = [' + h.history.dense_Dense3_acc[i] + ' ,' + h.history.dense_Dense5_acc[i] + '], loss = [' + h.history.dense_Dense3_loss[i] + ' ,' + h.history.dense_Dense5_loss[i] + ' ,' + h.history.loss[i] + ']');
         }
     }
     const t1 = Date.now();
@@ -104,7 +104,7 @@ async function fit(model, size, x, y, z, batch, logger) {
 }
 
 async function predict(model, size, x, batch, logger) {
-    const shape = [batch, 1, size, size];
+    const shape = [batch, PLANE_COUNT, size, size];
     const xs = tf.tensor4d(x, shape, 'float32');
 
     const t0 = Date.now();
