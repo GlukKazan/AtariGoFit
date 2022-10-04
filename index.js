@@ -7,7 +7,7 @@ const ml = require('./model');
 const game = require('./game');
 
 const SIZE  = 9;
-const BATCH = 1; //4096;
+const BATCH = 4096;
 
 let model = null;
 
@@ -51,7 +51,7 @@ async function proceed() {
         logger.info(line);
         await game.proceed(model, SIZE, BATCH, line, logger);
     }
-    await ml.save(model, 'go' + ml.PLANE_COUNT + '.json');
+    await ml.save(model, 'go-' + ml.PLANE_COUNT + '.json');
 }
 
 async function run() {
