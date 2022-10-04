@@ -3,7 +3,7 @@
 const _ = require('underscore');
 const tf = require('@tensorflow/tfjs-node-gpu');
 
-const PLANE_COUNT = 1; // TODO: 4-8
+const PLANE_COUNT = 8; // TODO: 4-8
 const BATCH_SIZE  = 1024;
 const EPOCH_COUNT = 1;
 const LEARNING_RATE = 0.001;
