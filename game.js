@@ -275,7 +275,10 @@ async function proceed(model, size, batch, data, logger) {
                 C = 0;
             }
             encode(board, size, player, xo, X, ix);
-            Y[yo + rotate(move, size, ix)] = (R - V) * player
+            const d = (R - V) * player;
+            if (d > 0) {
+                Y[yo + rotate(move, size, ix)] = d;
+            }
             Z[C] = R * player;
 //          dump(X, size, offset, Y);
             xo += size * size * ml.PLANE_COUNT;
