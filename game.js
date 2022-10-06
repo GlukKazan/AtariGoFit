@@ -245,7 +245,7 @@ async function proceed(model, size, batch, data, logger) {
         let V = 0; let s = 0.1;
         while ((pos < data.length) && isDigit(data[pos])) {
             if (data[pos] == '-') {
-                V = -V;
+                s = -s;
                 continue;
             }
             V += +data[pos] * s;
